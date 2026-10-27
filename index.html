@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <style>
   :root{
     --bg: #f6f4ef;
@@ -22,6 +23,18 @@
     --hero-ink: #f6efdf;
     --hero-dim: #b9a888;
   }
+  [data-theme="dark"] {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --ink: #e0e0e0;
+    --ink-dim: #a0a0a0;
+    --line: #333333;
+    --hero-bg: #000000;
+    --hero-ink: #f6efdf;
+    --hero-dim: #b9a888;
+    --up-bg: rgba(31,138,76,0.2);
+    --down-bg: rgba(194,59,59,0.2);
+  }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{
     background: var(--bg);
@@ -29,6 +42,9 @@
     font-family: 'Manrope', sans-serif;
     padding: 3.2rem 4vw 4rem;
     font-variant-numeric: tabular-nums;
+  }
+  body, .card, .coin, .breakdown, input, select, button {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
   .top{
     max-width: 1280px;
@@ -70,6 +86,14 @@
     padding: 1.6rem 1.5rem 1.5rem;
     position: relative;
     box-shadow: 0 1px 2px rgba(20,15,5,0.03);
+    cursor: default;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  }
+  [data-theme="dark"] .card:hover {
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
   }
   .card.hero{
     background: var(--hero-bg);
@@ -155,26 +179,280 @@
     text-align:center;
   }
 
+  /* Utility & New Features */
+  .action-bar {
+    margin-top: 0.8rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .action-btn, select.city-select {
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .action-btn:hover, select.city-select:hover {
+    border-color: var(--ink-dim);
+  }
+  
+  details.ledger {
+    max-width: 1280px;
+    margin: 2rem auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  details.ledger summary {
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+  }
+  .ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    text-align: left;
+    margin-top: 1rem;
+  }
+  .ledger-table th {
+    padding: 0.5rem;
+    color: var(--ink-dim);
+    font-weight: 600;
+    border-bottom: 1px solid var(--line);
+  }
+  .ledger-table td {
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* Modals */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-content {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    border: 1px solid var(--line);
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .modal-header h3 { font-size: 1.1rem; font-weight: 800; }
+  .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--ink-dim);
+    line-height: 1;
+  }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label {
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  .calc-summary {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+    margin-top: 1rem;
+  }
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .calc-row.total {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-top: 0.5rem;
+    color: var(--up);
+  }
+  .btn-primary {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--ink);
+    color: var(--bg);
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  .btn-secondary {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink-dim);
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+
   @media (max-width: 980px){ .grid{ grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 560px){ .grid{ grid-template-columns: 1fr; } .top{ flex-direction:column; align-items:flex-start;} .stamp{ text-align:left; } }
+  @media (max-width: 560px){ 
+    .grid{ grid-template-columns: 1fr; } 
+    .top{ flex-direction:column; align-items:flex-start;} 
+    .stamp{ text-align:left; } 
+    .action-bar { flex-direction: column; align-items: flex-start; width: 100%; }
+    .action-btn, select.city-select { width: 100%; }
+  }
 </style>
 </head>
 <body>
 
   <div class="top">
     <div>
-      <h1>Gold Rate, Today</h1>
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <h1>Gold Rate, Today</h1>
+        <span id="sentimentBadge" class="badge" style="position:static; font-size:0.7rem; padding:0.2rem 0.5rem; background:var(--line); color:var(--ink-dim);">Stable ➡️</span>
+      </div>
       <p>Live Indian market price, by karat</p>
+      <div class="action-bar">
+        <select id="citySelect" class="city-select">
+          <option value="Kutch" selected>Kutch (Default)</option>
+          <option value="Ahmedabad">Ahmedabad</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Chennai">Chennai</option>
+          <option value="Kolkata">Kolkata</option>
+          <option value="Bangalore">Bangalore</option>
+        </select>
+        <button id="calcBtn" class="action-btn">🧮 Jewelry Calculator</button>
+        <button id="alertBtn" class="action-btn">🔔 Price Alert</button>
+      </div>
     </div>
-    <div class="stamp"><b id="dateLine">Loading…</b><br>Updated <span id="timeLine">—</span></div>
+    <div class="stamp">
+      <div style="display:flex; align-items:center; gap:0.8rem; justify-content:flex-end; margin-bottom:0.8rem; flex-wrap:wrap;">
+        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+          <span style="font-size:0.78rem; color:var(--ink-dim);">Dark Mode</span>
+          <input type="checkbox" id="themeToggle" style="accent-color: var(--ink); width:16px; height:16px;">
+        </label>
+        <button id="shareBtnTop" class="action-btn" style="display:inline-flex; align-items:center; gap:0.4rem; background:#25D366; color:white; border:none; font-weight:700; padding: 0.4rem 0.8rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Share
+        </button>
+      </div>
+      <b id="dateLine">Loading…</b><br>Updated <span id="timeLine">—</span>
+    </div>
   </div>
 
   <div class="grid" id="grid"></div>
 
+  <details class="ledger">
+    <summary>📜 14-Day Historical Ledger</summary>
+    <div style="overflow-x:auto;">
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>22K Gold (10g)</th>
+            <th>Silver (1kg)</th>
+          </tr>
+        </thead>
+        <tbody id="ledgerBody"></tbody>
+      </table>
+    </div>
+  </details>
+
   <p class="note">Derived from live international spot gold (XAU/INR) with an approximate Indian market premium (import duty & local taxes). "vs yesterday" compares against the last price recorded on a previous day. Reference only, not a dealer quote.</p>
+
+  <!-- Calculator Modal -->
+  <div id="calcModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Jewelry Value Calculator</h3>
+        <button id="closeCalc" class="close-modal">&times;</button>
+      </div>
+      <div class="form-group">
+        <label>Weight (grams)</label>
+        <input type="number" id="calcWeight" value="10" min="0.1" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>Karat</label>
+        <select id="calcKarat">
+          <option value="24">24K (Pure)</option>
+          <option value="22" selected>22K (Hallmark)</option>
+          <option value="20">20K (Premium)</option>
+          <option value="18">18K (Classic)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Making Charges (%)</label>
+        <input type="number" id="calcMaking" value="10" min="0" step="1">
+      </div>
+      <div class="calc-summary">
+        <div class="calc-row"><span style="color:var(--ink-dim);">Base Gold Value:</span><span id="calcBase" style="font-weight:700;">₹0</span></div>
+        <div class="calc-row"><span style="color:var(--ink-dim);">GST (3%):</span><span id="calcGst" style="font-weight:700;">₹0</span></div>
+        <div class="calc-row total"><span>Estimated Total:</span><span id="calcTotal">₹0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alert Modal -->
+  <div id="alertModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Set 22K Price Alert</h3>
+        <button id="closeAlert" class="close-modal">&times;</button>
+      </div>
+      <p style="font-size:0.85rem; color:var(--ink-dim); margin-bottom:1rem;">Get notified when 22K gold (10g) drops to or below your target price.</p>
+      <div class="form-group">
+        <label>Target Price (₹ per 10g)</label>
+        <input type="number" id="alertTarget" placeholder="e.g., 65000">
+      </div>
+      <button id="saveAlert" class="btn-primary" style="background:var(--up); color:white;">Save Alert</button>
+      <button id="clearAlert" class="btn-secondary">Clear Alert</button>
+    </div>
+  </div>
 
 <script>
   const GRAMS_PER_OZ = 31.1034768;
+  const CITY_PREMIUMS = { 'Kutch': 1.13, 'Ahmedabad': 1.14, 'Mumbai': 1.15, 'Delhi': 1.165, 'Chennai': 1.14, 'Kolkata': 1.15, 'Bangalore': 1.155 };
+  
+  let currentCity = 'Kutch';
+  let currentGoldPrice24 = 0;
+  let currentSilverPrice = 0;
 
   const KARATS = [
     { k: 24, name: 'Pure Gold',    fine: '99.9% Fine', purity: 1.000,  coin: 'linear-gradient(135deg,#ffe9a8,#e6b93a)' },
@@ -183,11 +461,37 @@
     { k: 18, name: 'Classic Gold', fine: '75.0% Fine', purity: 0.750,  coin: 'linear-gradient(135deg,#e6c98e,#b8894a)' },
     { k: 14, name: 'Light Gold',   fine: '58.3% Fine', purity: 0.583,  coin: 'linear-gradient(135deg,#e3d0ae,#ab8f66)' },
     { k: 9,  name: 'Entry Gold',   fine: '37.5% Fine', purity: 0.375,  coin: 'linear-gradient(135deg,#ded2bd,#a89a83)' },
+    { k: 'Ag', name: 'Indian Silver', fine: '99.9% Fine', purity: 1, coin: 'linear-gradient(135deg,#e8e8e8,#a0a0a0)', type: 'silver' }
   ];
 
   const grid = document.getElementById('grid');
   const dateLine = document.getElementById('dateLine');
   const timeLine = document.getElementById('timeLine');
+
+  async function getStorage(key) {
+    try {
+      if (window.storage) {
+        const res = await window.storage.get(key, true);
+        if (res && res.value) return JSON.parse(res.value);
+      }
+    } catch(e) {}
+    try {
+      const val = localStorage.getItem(key);
+      return val ? JSON.parse(val) : null;
+    } catch(e) { return null; }
+  }
+
+  async function setStorage(key, value) {
+    const str = JSON.stringify(value);
+    try {
+      if (window.storage) {
+        await window.storage.set(key, str, true);
+      }
+    } catch(e) {}
+    try {
+      localStorage.setItem(key, str);
+    } catch(e) {}
+  }
 
   function fmtINR(n){
     return '₹' + Math.round(n).toLocaleString('en-IN');
@@ -197,79 +501,214 @@
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
-  function renderCards(pricePerGram24, yesterdayPricePerGram24){
+  function calculateSentiment(log, currentPrice) {
+    const dates = Object.keys(log).sort();
+    if (dates.length < 3) return { text: 'Stable ➡️', class: '' };
+    const recent = dates.slice(-7);
+    let sum = 0;
+    let count = 0;
+    recent.forEach(d => {
+      const val = typeof log[d] === 'object' ? log[d].gold : log[d];
+      if (val) { sum += val; count++; }
+    });
+    if (count === 0) return { text: 'Stable ➡️', class: '' };
+    const avg = sum / count;
+    if (currentPrice > avg * 1.01) return { text: 'Bullish 📈', class: 'up' };
+    if (currentPrice < avg * 0.99) return { text: 'Bearish 📉', class: 'down' };
+    return { text: 'Stable ➡️', class: '' };
+  }
+
+  function renderCards(pricePerGram24, yesterdayPricePerGram24, silverPricePerGram, yesterdaySilverPricePerGram){
     grid.innerHTML = '';
     KARATS.forEach(item => {
-      const per1g = pricePerGram24 * item.purity;
+      const isSilver = item.type === 'silver';
+      const basePrice = isSilver ? silverPricePerGram : pricePerGram24;
+      const purityMultiplier = isSilver ? 1 : item.purity;
+      
+      const per1g = basePrice * purityMultiplier;
       const per10g = per1g * 10;
       const per100g = per1g * 100;
+      const per1kg = per1g * 1000;
 
       let deltaHtml = '';
-      if (yesterdayPricePerGram24){
-        const yPer10g = yesterdayPricePerGram24 * item.purity * 10;
-        const diff = per10g - yPer10g;
-        const pct = (diff / yPer10g) * 100;
-        const up = diff >= 0;
-        deltaHtml = `<div class="delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${fmtINR(Math.abs(diff))} (${Math.abs(pct).toFixed(2)}%)<span class="vs">vs yesterday</span></div>`;
+      const yesterdayBase = isSilver ? yesterdaySilverPricePerGram : yesterdayPricePerGram24;
+      
+      if (yesterdayBase){
+        if (isSilver) {
+          const yPer1kg = yesterdayBase * purityMultiplier * 1000;
+          const diff = per1kg - yPer1kg;
+          const pct = (diff / yPer1kg) * 100;
+          const up = diff >= 0;
+          deltaHtml = `<div class="delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${fmtINR(Math.abs(diff))} (${Math.abs(pct).toFixed(2)}%)<span class="vs">vs yesterday</span></div>`;
+        } else {
+          const yPer10g = yesterdayBase * purityMultiplier * 10;
+          const diff = per10g - yPer10g;
+          const pct = (diff / yPer10g) * 100;
+          const up = diff >= 0;
+          deltaHtml = `<div class="delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${fmtINR(Math.abs(diff))} (${Math.abs(pct).toFixed(2)}%)<span class="vs">vs yesterday</span></div>`;
+        }
       }
+
+      const coinText = isSilver ? 'Ag' : `${item.k}K`;
+      const mainPrice = isSilver ? Math.round(per1kg) : Math.round(per10g);
+      const mainUnit = isSilver ? '/ 1kg' : '/ 10g';
 
       const card = document.createElement('div');
       card.className = 'card' + (item.hero ? ' hero' : '');
       card.innerHTML = `
         ${item.badge ? `<div class="badge">★ ${item.badge}</div>` : ''}
         <div class="head">
-          <div class="coin" style="background:${item.coin}">${item.k}K</div>
+          <div class="coin" style="background:${item.coin}">${coinText}</div>
           <div>
             <div class="name">${item.name}</div>
             <div class="fine">${item.fine}</div>
           </div>
         </div>
-        <div class="price-row"><span class="rupee">₹</span><span class="price">${Math.round(per10g).toLocaleString('en-IN')}</span><span class="per">/ 10g</span></div>
+        <div class="price-row"><span class="rupee">₹</span><span class="price">${mainPrice.toLocaleString('en-IN')}</span><span class="per">${mainUnit}</span></div>
         ${deltaHtml}
         <div class="breakdown">
-          <div class="brow"><span>Per 1g</span><span>${fmtINR(per1g)}</span></div>
-          <div class="brow"><span>Per 100g</span><span>${fmtINR(per100g)}</span></div>
+          ${isSilver 
+            ? `<div class="brow"><span>Per 1g</span><span>${fmtINR(per1g)}</span></div>
+               <div class="brow"><span>Per 10g</span><span>${fmtINR(per10g)}</span></div>`
+            : `<div class="brow"><span>Per 1g</span><span>${fmtINR(per1g)}</span></div>
+               <div class="brow"><span>Per 100g</span><span>${fmtINR(per100g)}</span></div>`
+          }
         </div>
       `;
       grid.appendChild(card);
     });
   }
 
+  function renderLedger(log) {
+    const tbody = document.getElementById('ledgerBody');
+    tbody.innerHTML = '';
+    const dates = Object.keys(log).sort().reverse();
+    dates.forEach(d => {
+      const val = log[d];
+      const gold = typeof val === 'object' ? val.gold : val;
+      const silver = typeof val === 'object' ? val.silver : null;
+      const gold10g = gold ? Math.round(gold * 0.916 * 10) : '-';
+      const silver1kg = silver ? Math.round(silver * 1000) : '-';
+      
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${d}</td>
+        <td>₹${Number(gold10g).toLocaleString('en-IN')}</td>
+        <td>₹${Number(silver1kg).toLocaleString('en-IN')}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateCalculator() {
+    const weight = parseFloat(document.getElementById('calcWeight').value) || 0;
+    const karat = parseInt(document.getElementById('calcKarat').value);
+    const making = parseFloat(document.getElementById('calcMaking').value) || 0;
+    
+    const purity = karat === 24 ? 1.0 : karat === 22 ? 0.916 : karat === 20 ? 0.833 : karat === 18 ? 0.75 : 1.0;
+    const pricePerGram = currentGoldPrice24 * purity;
+    
+    const baseValue = weight * pricePerGram;
+    const withMaking = baseValue * (1 + making / 100);
+    const gst = withMaking * 0.03;
+    const total = withMaking + gst;
+    
+    document.getElementById('calcBase').textContent = fmtINR(baseValue);
+    document.getElementById('calcGst').textContent = fmtINR(gst);
+    document.getElementById('calcTotal').textContent = fmtINR(total);
+  }
+
+  function checkAlert(price22k10g) {
+    const alertTargetStr = localStorage.getItem('goldAlertTarget');
+    if (!alertTargetStr) return;
+    
+    const target = parseFloat(alertTargetStr);
+    if (price22k10g <= target) {
+      const msg = `22K Gold has dropped to ${fmtINR(price22k10g)} per 10g, meeting your target of ${fmtINR(target)}!`;
+      
+      if (Notification.permission === 'granted') {
+        new Notification('Gold Price Alert! 📉', { body: msg });
+      } else if (Notification.permission === 'denied') {
+        alert('🔔 Gold Price Alert!\n' + msg);
+      } else {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            new Notification('Gold Price Alert! 📉', { body: msg });
+          } else {
+            alert('🔔 Gold Price Alert!\n' + msg);
+          }
+        });
+      }
+      
+      // Clear the alert so it doesn't trigger repeatedly
+      localStorage.removeItem('goldAlertTarget');
+      const alertInput = document.getElementById('alertTarget');
+      if (alertInput) alertInput.value = '';
+    }
+  }
+
   async function loadRates(){
     try {
-      // Fetch gold price directly in INR
       const goldRes = await fetch('https://api.gold-api.com/price/XAU/INR');
       const gold = await goldRes.json();
-
-      const inrPerOz = gold.price;
+      const inrPerOzGold = gold.price;
+      const spotPricePerGram24 = inrPerOzGold / GRAMS_PER_OZ;
       
-      // Convert to per gram (24K)
-      const spotPricePerGram24 = inrPerOz / GRAMS_PER_OZ;
-      
-      // Apply Indian market premium (~15% import duty + local premiums)
-      // International spot converted to INR is typically ~15% lower than actual Indian market rates
-      const INDIAN_MARKET_PREMIUM = 1.15;
-      const pricePerGram24 = spotPricePerGram24 * INDIAN_MARKET_PREMIUM;
+      const cityPremium = CITY_PREMIUMS[currentCity] || 1.15;
+      currentGoldPrice24 = spotPricePerGram24 * cityPremium;
 
-      // Pull the shared day-log so "vs yesterday" reflects real prior-day data
-      // across anyone who has visited this page (shared, price data only).
-      let log = {};
+      let silverPricePerGram = 0;
       try {
-        const stored = await window.storage.get('gold-day-log', true);
-        if (stored && stored.value) log = JSON.parse(stored.value);
-      } catch (e) { /* no log yet */ }
+        const silverRes = await fetch('https://api.gold-api.com/price/XAG/INR');
+        const silver = await silverRes.json();
+        if (silver.price) {
+          silverPricePerGram = (silver.price / GRAMS_PER_OZ) * 1.10;
+        } else { throw new Error("No price"); }
+      } catch (e) {
+        const [silverUsdRes, fxRes] = await Promise.all([
+          fetch('https://api.gold-api.com/price/XAG'),
+          fetch('https://open.er-api.com/v6/latest/USD')
+        ]);
+        const silverUsd = await silverUsdRes.json();
+        const fx = await fxRes.json();
+        silverPricePerGram = ((silverUsd.price * fx.rates.INR) / GRAMS_PER_OZ) * 1.10;
+      }
+      currentSilverPrice = silverPricePerGram;
 
+      let log = await getStorage('gold-day-log') || {};
       const tKey = todayKey();
       const priorDates = Object.keys(log).filter(d => d !== tKey).sort();
-      const yesterdayPrice = priorDates.length ? log[priorDates[priorDates.length - 1]] : null;
+      let yesterdayPrice = null;
+      let yesterdaySilverPrice = null;
+      
+      if (priorDates.length) {
+        const lastLog = log[priorDates[priorDates.length - 1]];
+        if (typeof lastLog === 'object' && lastLog !== null) {
+          yesterdayPrice = lastLog.gold;
+          yesterdaySilverPrice = lastLog.silver;
+        } else {
+          yesterdayPrice = lastLog;
+        }
+      }
 
-      renderCards(pricePerGram24, yesterdayPrice);
+      renderCards(currentGoldPrice24, yesterdayPrice, currentSilverPrice, yesterdaySilverPrice);
+      
+      const sentiment = calculateSentiment(log, currentGoldPrice24);
+      const badge = document.getElementById('sentimentBadge');
+      badge.textContent = sentiment.text;
+      badge.className = 'badge';
+      badge.style.background = sentiment.class === 'up' ? 'var(--up-bg)' : sentiment.class === 'down' ? 'var(--down-bg)' : 'var(--line)';
+      badge.style.color = sentiment.class === 'up' ? 'var(--up)' : sentiment.class === 'down' ? 'var(--down)' : 'var(--ink-dim)';
 
-      // Update today's entry, keep log trimmed to last 14 days.
-      log[tKey] = pricePerGram24;
+      renderLedger(log);
+
+      log[tKey] = { gold: currentGoldPrice24, silver: currentSilverPrice };
       const allDates = Object.keys(log).sort();
       while (allDates.length > 14){ delete log[allDates.shift()]; }
-      try { await window.storage.set('gold-day-log', JSON.stringify(log), true); } catch (e) {}
+      await setStorage('gold-day-log', log);
+
+      const price22k10g = currentGoldPrice24 * 0.916 * 10;
+      checkAlert(price22k10g);
 
       const now = new Date();
       dateLine.textContent = now.toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
@@ -281,6 +720,94 @@
       console.error(err);
     }
   }
+
+  // Event Listeners
+  document.getElementById('citySelect').addEventListener('change', (e) => {
+    currentCity = e.target.value;
+    loadRates();
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  themeToggle.addEventListener('change', (e) => {
+    document.documentElement.setAttribute('data-theme', e.target.checked ? 'dark' : 'light');
+    localStorage.setItem('theme', e.target.checked ? 'dark' : 'light');
+  });
+
+  if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    themeToggle.checked = true;
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    document.getElementById('calcModal').style.display = 'flex';
+    updateCalculator();
+  });
+  document.getElementById('closeCalc').addEventListener('click', () => {
+    document.getElementById('calcModal').style.display = 'none';
+  });
+  document.getElementById('calcWeight').addEventListener('input', updateCalculator);
+  document.getElementById('calcKarat').addEventListener('change', updateCalculator);
+  document.getElementById('calcMaking').addEventListener('input', updateCalculator);
+
+  document.getElementById('alertBtn').addEventListener('click', () => {
+    document.getElementById('alertModal').style.display = 'flex';
+    const saved = localStorage.getItem('goldAlertTarget');
+    if (saved) document.getElementById('alertTarget').value = saved;
+  });
+  document.getElementById('closeAlert').addEventListener('click', () => {
+    document.getElementById('alertModal').style.display = 'none';
+  });
+  document.getElementById('saveAlert').addEventListener('click', () => {
+    const target = document.getElementById('alertTarget').value;
+    if (!target) return;
+    localStorage.setItem('goldAlertTarget', target);
+    if (Notification.permission !== 'granted') Notification.requestPermission();
+    document.getElementById('alertModal').style.display = 'none';
+    alert('✅ Alert saved! We will notify you if 22K gold drops to ₹' + Number(target).toLocaleString('en-IN') + ' per 10g.');
+  });
+  document.getElementById('clearAlert').addEventListener('click', () => {
+    localStorage.removeItem('goldAlertTarget');
+    document.getElementById('alertTarget').value = '';
+    document.getElementById('alertModal').style.display = 'none';
+    alert('Alert cleared.');
+  });
+
+  document.getElementById('shareBtnTop').addEventListener('click', async () => {
+    const gridEl = document.getElementById('grid');
+    try {
+      const canvas = await html2canvas(gridEl, { 
+        backgroundColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#121212' : '#f6f4ef', 
+        scale: 2 
+      });
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'gold-rate-today.png', { type: 'image/png' });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'Today\'s Gold Rate',
+            text: 'Check out today\'s live gold and silver rates!',
+            files: [file]
+          });
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'gold-rate-today.png';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    } catch (err) {
+      console.error('Share failed', err);
+      alert('Could not generate share image. Please try again.');
+    }
+  });
+
+  // Close modals on backdrop click
+  document.querySelectorAll('.modal-backdrop').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = 'none';
+    });
+  });
 
   loadRates();
   setInterval(loadRates, 60 * 60 * 1000);
